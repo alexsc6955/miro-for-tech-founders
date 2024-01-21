@@ -10,24 +10,35 @@
     
     <div id="root">
       <div class="grid wrapper">
-        <div class="cs1 ce12">
+        <!-- <div class="cs1 ce12">
           <img src="/src/assets/congratulations.png" alt="" />
-        </div>
-        <div class="cs1 ce12">
-          <h1>Congratulations!</h1>
-          <p>You've just created your first Miro app!</p>
+        </div> -->
+        <div id="content" class="cs1 ce12">
+          <h1>Welcome to Miro for Tech Founders</h1>
           <p>
-            To explore more and build your own app, see the Miro Developer
-            Platform documentation.
+            This app uses AI to help you build a business model canvas and a business plan document.
+          </p>
+          <p>
+            Please click the button below to give your AI assistant information about your business.
           </p>
         </div>
         <div class="cs1 ce12">
           <a
+            id="appButton"
             class="button button-primary"
             target="_blank"
-            href="https://developers.miro.com"
+            href="http://localhost:8000"
           >
-            Read the documentation
+            Go to Business Model Canvas
+          </a>
+          <br>
+          <a
+            id="restartButton"
+            class="button button-primary"
+            href="#"
+            style="display: none;"
+          >
+            Restart
           </a>
         </div>
       </div>
