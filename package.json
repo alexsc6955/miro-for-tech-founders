@@ -8,7 +8,8 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "mirotone": "5"
+    "mirotone": "5",
+    "penrose-paradox": "^0.4.10"
   },
   "devDependencies": {
     "vite": "3.0.3"
