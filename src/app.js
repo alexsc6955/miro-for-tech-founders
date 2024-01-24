@@ -68,10 +68,12 @@ function Home() {
         classList: "button button-primary",
         events: {
           click: async () => {
-            if (await miro.board.ui.canOpenPanel()) {
-              await miro.board.ui.openPanel({
-                url: 'index.html',
+            if (await miro.board.ui.canOpenModal()) {
+              await miro.board.ui.openModal({
+                url: 'views/wizard-modal.html',
+                width: 600,
                 height: 400,
+                fullscreen: false,
               });
             }
           }
