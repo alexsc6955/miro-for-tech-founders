@@ -4,39 +4,35 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="https://miro.com/app/static/sdk/v2/miro.js"></script>
-    <title>Canvas Business Model</title>
+    <title>Miro for Tech Founders</title>
   </head>
   <body>
     
     <div id="root">
       <div class="grid wrapper">
-        <!-- <div class="cs1 ce12">
-          <img src="/src/assets/congratulations.png" alt="" />
-        </div> -->
-        <div id="content" class="cs1 ce12">
-          <h1>Welcome to Miro for Tech Founders</h1>
-          <p>
-            This app uses AI to help you build a business model canvas and a business plan document.
-          </p>
-          <p>
-            Please click the button below to give your AI assistant information about your business.
-          </p>
-        </div>
         <div class="cs1 ce12">
+          <h1 id="title" class="">Miro for Tech Founders</h1>
+          <div id="content">
+            <p>
+              With AI integration, tech founders can quickly create a business model canvas and plan within five minutes using Miro boards.
+            </p>
+          </div>
+        </div>
+        <div id="buttons" class="cs1 ce12" style="display: flex; flex-direction: column;">
           <a
             id="appButton"
             class="button button-primary"
             target="_blank"
             href="http://localhost:8000"
+            style="width: 100%;"
           >
-            Go to Business Model Canvas
+            Start Wizard
           </a>
-          <br>
           <a
             id="restartButton"
             class="button button-primary"
             href="#"
-            style="display: none;"
+            style="width: 100%;"
           >
             Restart
           </a>
