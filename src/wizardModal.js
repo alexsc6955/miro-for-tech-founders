@@ -38,6 +38,30 @@ const initialData = {
   keyPartners: "Miro",
   costStructure: "Development, marketing, server",
 }
+  
+const canvasSize = {
+  width: 6000,
+  height: 3375,
+}
+
+const mtfCollection = miro.board.storage.collection('mtf');
+
+Paradox.pubsub.subscribe("mtf:canvas:ready", async (data) => {
+  const shape = await miro.board.createShape({
+    content: "Your Business Model Canvas",
+    shape: 'round_rectangle',
+    width: canvasSize.width + 1000,
+    height: canvasSize.height + 1000,
+    style: {
+      fillColor: "#fefefe",
+      textAlignVertical: "top",
+      fontSize: 144
+    }
+  })
+  await miro.board.viewport.zoomTo(shape);
+  await miro.board.ui.closeModal();
+  await mtfCollection.set("mtf:canvas:container_id", shape.id);
+});
 
 function Spinner(props = {}) {
   console.log(data);
@@ -47,9 +71,11 @@ function Spinner(props = {}) {
       "Content-Type": "application/json"
     },
     body: JSON.stringify(data)
-  }).then(res => res.json()).then(res => {
-    console.log(res);
+  }).then(res => res.json()).then(json => {
+    console.log(json);
+    Paradox.pubsub.publish("mtf:canvas:ready", json);
   })
+
   return {
     tag: "div",
     options: {

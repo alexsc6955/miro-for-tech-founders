@@ -75,6 +75,8 @@ function Home() {
                 height: 400,
                 fullscreen: false,
               });
+
+              await miro.board.ui.closePanel();
             }
           }
         }
