@@ -1,6 +1,8 @@
 import "./assets/style.css";
 import Paradox from "penrose-paradox/build/index";
 
+const { VITE_OPENAI_API_KEY } = import.meta.env;
+
 const forms = {
   valueProposition: ValueProposition,
   customerSegments: CustomerSegments,
