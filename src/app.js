@@ -98,6 +98,18 @@ function render() {
 
 render();
 
+function buildCanvas(containerId) {
+  console.log(containerId);
+}
+
+const mtfCollection = miro.board.storage.collection('mtf');
+const checkCollection = setInterval(async () => {
+  const containerId = await mtfCollection.get("mtf:canvas:container_id");
+  if (containerId) {
+    clearInterval(checkCollection);
+    buildCanvas(containerId);
+  }
+}, 500);
 // const API_URL = "http://localhost:8000/api";
   
 // const canvasSize = {
