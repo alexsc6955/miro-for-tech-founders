@@ -13,6 +13,63 @@ const forms = {
   costStructure: CostStructure,
 }
 
+const data = {
+  valueProposition: "",
+  customerSegments: "",
+  channels: "",
+  customerRelationship: "",
+  revenueStreams: "",
+  keyResources: "",
+  keyActivities: "",
+  keyPartners: "",
+  costStructure: "",
+}
+
+const initialData = {
+  valueProposition: "Provide a simple and easy to use tool for tech founders to create their business model canvas and business plan in less than 5 minutes.",
+  customerSegments: "Tech founders, entrepreneurs, startups.",
+  channels: "Miro board",
+  customerRelationship: "Social media, github, email, miro community",
+  revenueStreams: "Donations",
+  keyResources: "Miro board, github",
+  keyActivities: "Development, marketing",
+  keyPartners: "Miro",
+  costStructure: "Development, marketing, server",
+}
+
+function Spinner(props = {}) {
+  console.log(data);
+  return {
+    tag: "div",
+    options: {
+      style: {
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center"
+      },
+      children: [
+        {
+          tag: "div",
+          options: {
+            style: {
+              width: "3rem",
+              height: "3rem",
+              borderWidth: "0.5rem",
+              borderStyle: "solid",
+              borderColor: "#ccc",
+              borderRadius: "50%",
+              borderTopColor: "#00f",
+              animation: "spin 1s linear infinite"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
 function Layout(props = {}) {
   const { currentPage } = props;
   return {
@@ -85,7 +142,6 @@ function Initial(props) {
 
 function ProgressBar(props) {
   const { progress } = props;
-  console.log(progress);
   return {
     tag: "div",
     options: {
@@ -146,12 +202,30 @@ function FormLayout(props = {}) {
 
   function handleButtonClick(ev) {
     ev.preventDefault();
+    let renderSpinner = false;
+
     const currentFormIndex = Object.keys(forms).indexOf(currentForm);
     const totalForms = Object.keys(forms).length;
-    const nextFormIndex = currentFormIndex < totalForms - 1
-      ? currentFormIndex + 1
-      : currentFormIndex;
+    let nextFormIndex = 0; 
+    if (currentFormIndex < totalForms - 1) nextFormIndex = currentFormIndex + 1
+    else {
+      nextFormIndex = 0;
+      renderSpinner = true;
+    }
     const nextForm = Object.keys(forms)[nextFormIndex];
+
+    const input = document.querySelector("textarea");
+    data[currentForm] = input.value;
+
+    if (renderSpinner) {
+      render(
+        {
+          currentPage: Spinner,
+        }
+      );
+      return;
+    }
+
     render(
       {
         currentPage: FormLayout,
@@ -162,10 +236,26 @@ function FormLayout(props = {}) {
 
   function handleBackButtonClick(ev) {
     ev.preventDefault();
+    let renderInitial = false;
+
     const currentFormIndex = Object.keys(forms).indexOf(currentForm);
-    const prevFormIndex = currentFormIndex > 0
-      ? currentFormIndex - 1
-      : currentFormIndex;
+    const totalForms = Object.keys(forms).length;
+    let prevFormIndex = totalForms;
+    if (currentFormIndex > 0) prevFormIndex = currentFormIndex - 1
+    else {
+      prevFormIndex = totalForms - 1;
+      renderInitial = true;
+    }
+
+    if (renderInitial) {
+      render(
+        {
+          currentPage: Initial
+        }
+      );
+      return;
+    }
+
     const prevForm = Object.keys(forms)[prevFormIndex];
     render(
       {
@@ -262,6 +352,7 @@ function ValueProposition(props = {}) {
               rows: "4",
               resize: "true"
             },
+            text: initialData.valueProposition
           }
         }
       ]
@@ -306,6 +397,7 @@ function CustomerSegments(props = {}) {
               rows: "4",
               resize: "true"
             },
+            text: initialData.customerSegments
           }
         }
       ]
@@ -350,6 +442,7 @@ function Channels(props = {}) {
               rows: "4",
               resize: "true"
             },
+            text: initialData.channels
           }
         }
       ]
@@ -394,6 +487,7 @@ function CustomerRelationship(props = {}) {
               rows: "4",
               resize: "true"
             },
+            text: initialData.customerRelationship
           }
         }
       ]
@@ -438,6 +532,7 @@ function RevenueStreams(props = {}) {
               rows: "4",
               resize: "true"
             },
+            text: initialData.revenueStreams
           }
         }
       ]
@@ -482,6 +577,7 @@ function KeyResources(props = {}) {
               rows: "4",
               resize: "true"
             },
+            text: initialData.keyResources
           }
         }
       ]
@@ -526,6 +622,7 @@ function KeyActivities(props = {}) {
               rows: "4",
               resize: "true"
             },
+            text: initialData.keyActivities
           }
         }
       ]
@@ -570,6 +667,7 @@ function KeyPartners(props = {}) {
               rows: "4",
               resize: "true"
             },
+            text: initialData.keyPartners
           }
         }
       ]
@@ -614,6 +712,7 @@ function CostStructure(props = {}) {
               rows: "4",
               resize: "true"
             },
+            text: initialData.costStructure
           }
         }
       ]
