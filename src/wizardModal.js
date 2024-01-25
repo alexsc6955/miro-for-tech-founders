@@ -1,5 +1,6 @@
 import "./assets/style.css";
 import Paradox from "penrose-paradox/build/index";
+import { canvasSize } from "./constants";
 
 const { VITE_API_URL } = import.meta.env;
 
@@ -37,11 +38,6 @@ const initialData = {
   keyActivities: "Development, marketing",
   keyPartners: "Miro",
   costStructure: "Development, marketing, server",
-}
-  
-const canvasSize = {
-  width: 6000,
-  height: 3375,
 }
 
 const mtfCollection = miro.board.storage.collection('mtf');

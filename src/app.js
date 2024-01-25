@@ -1,5 +1,6 @@
 import "./assets/style.css";
 import Paradox from "penrose-paradox/build/index";
+// import { canvasSize } from "./constants";
 
 function Layout(props = {}) {
   const { title =  "", content = [], buttons = [] } = props;
