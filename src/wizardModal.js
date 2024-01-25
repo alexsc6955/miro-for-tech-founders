@@ -1,7 +1,7 @@
 import "./assets/style.css";
 import Paradox from "penrose-paradox/build/index";
 
-const { VITE_OPENAI_API_KEY } = import.meta.env;
+const { VITE_API_URL } = import.meta.env;
 
 const forms = {
   valueProposition: ValueProposition,
@@ -41,6 +41,15 @@ const initialData = {
 
 function Spinner(props = {}) {
   console.log(data);
+  fetch(`${VITE_API_URL}/build-business-model`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(data)
+  }).then(res => res.json()).then(res => {
+    console.log(res);
+  })
   return {
     tag: "div",
     options: {
