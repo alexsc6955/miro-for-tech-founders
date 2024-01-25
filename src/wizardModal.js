@@ -57,6 +57,7 @@ Paradox.pubsub.subscribe("mtf:canvas:ready", async (data) => {
   await miro.board.viewport.zoomTo(shape);
   console.log(shape)
   await miro.board.ui.openPanel({url: 'app.html'});
+  await mtfCollection.set("mtf:canvas:data", JSON.stringify(data));
   await mtfCollection.set("mtf:canvas:container_id", shape.id);
   await miro.board.ui.closeModal();
 });

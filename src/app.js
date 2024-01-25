@@ -101,6 +101,11 @@ render();
 
 function buildCanvas(containerId) {
   console.log(containerId);
+  // get data from the collection
+
+  // use data to build the canvas
+
+  // Re render the page with different options
 }
 
 const mtfCollection = miro.board.storage.collection('mtf');
@@ -109,6 +114,7 @@ const checkCollection = setInterval(async () => {
   if (containerId) {
     clearInterval(checkCollection);
     buildCanvas(containerId);
+    // remove the container id from the collection
   }
 }, 500);
 // const API_URL = "http://localhost:8000/api";
