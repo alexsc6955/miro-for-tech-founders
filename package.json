@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "mirotone": "5",
+    "openai": "^4.25.0",
     "penrose-paradox": "^0.4.10"
   },
   "devDependencies": {
