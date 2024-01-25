@@ -59,8 +59,10 @@ Paradox.pubsub.subscribe("mtf:canvas:ready", async (data) => {
     }
   })
   await miro.board.viewport.zoomTo(shape);
+  console.log(shape)
+  await miro.board.ui.openPanel({url: 'app.html'});
   await miro.board.ui.closeModal();
-  await mtfCollection.set("mtf:canvas:container_id", shape.id);
+  // await mtfCollection.set("mtf:canvas:container_id", shape.id);;
 });
 
 function Spinner(props = {}) {
