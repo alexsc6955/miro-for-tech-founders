@@ -1,6 +1,6 @@
 import "./assets/style.css";
 import Paradox from "penrose-paradox/build/index";
-// import { canvasSize } from "./constants";
+import { canvasSize } from "./constants";
 
 function Layout(props = {}) {
   const { title =  "", content = [], buttons = [] } = props;
@@ -98,23 +98,190 @@ function render() {
 }
 
 render();
+    
+async function buildItem(type = "top-small", position = "top-left", options = {}) {
+  const types = {
+    "top-small": {
+      width: canvasSize.width / 5,
+      height: canvasSize.height / 3,
+    },
+    "top-large": {
+      width: canvasSize.width / 5,
+      height: canvasSize.height / 3 * 2,
+    },
+    "bottom-large": {
+      width: canvasSize.width / 2,
+      height: canvasSize.height / 3,
+    },
+  }
 
-function buildCanvas(containerId) {
+  function calculatePosition(positionType = "top-large") {
+    const positions = {
+      "top-left": {
+        x: - canvasSize.width / 2 + types[type].width / 2,
+        y: - canvasSize.height / 2 + types[type].height / 2,
+      },
+      "top-middle-left": {
+        x: - canvasSize.width / 2 + types[type].width / 2 + types[type].width,
+        y: - canvasSize.height / 2 + types[type].height / 2,
+      },
+      "bottom-middle-left": {
+        x: - canvasSize.width / 2 + types[type].width / 2 + types[type].width,
+        y: - canvasSize.height / 2 + types[type].height / 2 + types[type].height,
+      },
+      "top-center": {
+        x: 0,
+        y: - canvasSize.height / 2 + types[type].height / 2,
+      },
+      "top-middle-right": {
+        x: canvasSize.width / 2 - types[type].width / 2 - types[type].width,
+        y: - canvasSize.height / 2 + types[type].height / 2,
+      },
+      "bottom-middle-right": {
+        x: canvasSize.width / 2 - types[type].width / 2 - types[type].width,
+        y: - canvasSize.height / 2 + types[type].height / 2 + types[type].height,
+      },
+      "top-right": {
+        x: canvasSize.width / 2 - types[type].width / 2,
+        y: - canvasSize.height / 2 + types[type].height / 2,
+      },
+      "bottom-left": {
+        x: - canvasSize.width / 2 + types[type].width / 2,
+        y: canvasSize.height / 2 - types[type].height / 2,
+      },
+      "bottom-right": {
+        x: canvasSize.width / 2 - types[type].width / 2,
+        y: canvasSize.height / 2 - types[type].height / 2,
+      },
+    }
+    return positions[positionType]
+  }
+
+  const calculatedPosition = calculatePosition(position)
+
+  const { fillColor = "#d3d3d3", textAlignVertical = "top", fontSize = 144, borderOpacity = .3 } = options;
+
+  return miro.board.createShape({
+    content: options.content || "",
+    width: types[type].width,
+    height: types[type].height,
+    x: calculatedPosition.x,
+    y: calculatedPosition.y,
+    style: {
+      fillColor: fillColor,
+      textAlignVertical: textAlignVertical,
+      fontSize: fontSize,
+      borderOpacity: borderOpacity,
+    }
+  })
+}
+
+async function createCanvasCategoryItems() {
+  const keyPartners = await buildItem("top-large", "top-left", {
+    content: "Key Partners",
+  })
+
+  const keyActivities = await buildItem("top-small", "top-middle-left", {
+    content: "Key Activities",
+  })
+
+  const keyResources = await buildItem("top-small", "bottom-middle-left", {
+    content: "Key Resources",
+  })
+
+  const customerSegments = await buildItem("top-large", "top-right", {
+    content: "Customer Segments",
+  })
+
+  const customerRelationship = await buildItem("top-small", "top-middle-right", {
+    content: "Customer Relationship",
+  })
+
+  const channels = await buildItem("top-small", "bottom-middle-right", {
+    content: "Channels",
+  })
+
+  const valueProposition = await buildItem("top-large", "top-center", {
+    content: "Value Proposition",
+  })
+
+  const costStructure = await buildItem("bottom-large", "bottom-left", {
+    content: "Cost Structure",
+  })
+
+  const revenueStreams = await buildItem("bottom-large", "bottom-right", {
+    content: "Revenue Streams",
+  })
+
+  return [keyPartners, keyActivities, keyResources, customerSegments, customerRelationship, channels, valueProposition, costStructure, revenueStreams];
+}
+
+const mtfCollection = miro.board.storage.collection('mtf');
+
+async function buildCanvas(containerId) {
   console.log(containerId);
+  const shapeItem = await miro.board.get({ id: containerId });
+  const shape = shapeItem[0];
+
   // get data from the collection
+  const data = JSON.parse(await mtfCollection.get("mtf:canvas:data"));
 
   // use data to build the canvas
+  const items = await createCanvasCategoryItems();
+
+  // const canvasGroup =  await miro.board.group({items})
+  // const groupedItems = await canvasGroup.getItems();
+  // console.log(123,canvasGroup);
+      
+  // currentIterationCache for y value
+  let currentIterationCache = 0
+  async function buildStickyItem(item, content, count) {
+    if (count === 0) currentIterationCache = 0;
+    console.log(item);
+    const sticky = await miro.board.createStickyNote({
+      content,
+    })
+    const y = currentIterationCache === 0
+      ? item.y - sticky.height * 1.5
+      : currentIterationCache + sticky.height * 1.5
+    sticky.x = item.x - sticky.width / 2
+    sticky.y = y
+    await sticky.sync()
+    currentIterationCache = sticky.y
+    return sticky
+  }
+  
+  const allGroupedItems = [];
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i]
+    const dataKey = Object.keys(data)[i]
+    const dataValue = data[dataKey]
+    // console.log(i, item, dataKey, dataValue);
+    const stickies = [];
+    for (let j = 0; j < dataValue.length; j++) {
+      const content = dataValue[j]
+      const sticky = await buildStickyItem(item, content, j);
+      stickies.push(sticky);
+    }
+    allGroupedItems.push({
+      key: dataKey,
+      item,
+      stickies,
+    })
+
+    console.log(allGroupedItems);
+  }
 
   // Re render the page with different options
 }
 
-const mtfCollection = miro.board.storage.collection('mtf');
 const checkCollection = setInterval(async () => {
   const containerId = await mtfCollection.get("mtf:canvas:container_id");
   if (containerId) {
     clearInterval(checkCollection);
     buildCanvas(containerId);
     // remove the container id from the collection
+    await mtfCollection.set("mtf:canvas:container_id", null);
   }
 }, 500);
 // const API_URL = "http://localhost:8000/api";
@@ -252,83 +419,6 @@ const checkCollection = setInterval(async () => {
 //       }, {});
   
 //       console.log(sortedData);
-    
-//       async function buildItem(type = "top-small", position = "top-left", options = {}) {
-//         const types = {
-//           "top-small": {
-//             width: canvasSize.width / 5,
-//             height: canvasSize.height / 3,
-//           },
-//           "top-large": {
-//             width: canvasSize.width / 5,
-//             height: canvasSize.height / 3 * 2,
-//           },
-//           "bottom-large": {
-//             width: canvasSize.width / 2,
-//             height: canvasSize.height / 3,
-//           },
-//         }
-    
-//         function calculatePosition(positionType = "top-large") {
-//           const positions = {
-//             "top-left": {
-//               x: - canvasSize.width / 2 + types[type].width / 2,
-//               y: - canvasSize.height / 2 + types[type].height / 2,
-//             },
-//             "top-middle-left": {
-//               x: - canvasSize.width / 2 + types[type].width / 2 + types[type].width,
-//               y: - canvasSize.height / 2 + types[type].height / 2,
-//             },
-//             "bottom-middle-left": {
-//               x: - canvasSize.width / 2 + types[type].width / 2 + types[type].width,
-//               y: - canvasSize.height / 2 + types[type].height / 2 + types[type].height,
-//             },
-//             "top-center": {
-//               x: 0,
-//               y: - canvasSize.height / 2 + types[type].height / 2,
-//             },
-//             "top-middle-right": {
-//               x: canvasSize.width / 2 - types[type].width / 2 - types[type].width,
-//               y: - canvasSize.height / 2 + types[type].height / 2,
-//             },
-//             "bottom-middle-right": {
-//               x: canvasSize.width / 2 - types[type].width / 2 - types[type].width,
-//               y: - canvasSize.height / 2 + types[type].height / 2 + types[type].height,
-//             },
-//             "top-right": {
-//               x: canvasSize.width / 2 - types[type].width / 2,
-//               y: - canvasSize.height / 2 + types[type].height / 2,
-//             },
-//             "bottom-left": {
-//               x: - canvasSize.width / 2 + types[type].width / 2,
-//               y: canvasSize.height / 2 - types[type].height / 2,
-//             },
-//             "bottom-right": {
-//               x: canvasSize.width / 2 - types[type].width / 2,
-//               y: canvasSize.height / 2 - types[type].height / 2,
-//             },
-//           }
-//           return positions[positionType]
-//         }
-    
-//         const calculatedPosition = calculatePosition(position)
-  
-//         const { fillColor = "#d3d3d3", textAlignVertical = "top", fontSize = 144, borderOpacity = .3 } = options;
-    
-//         return miro.board.createShape({
-//           content: options.content || "",
-//           width: types[type].width,
-//           height: types[type].height,
-//           x: calculatedPosition.x,
-//           y: calculatedPosition.y,
-//           style: {
-//             fillColor: fillColor,
-//             textAlignVertical: textAlignVertical,
-//             fontSize: fontSize,
-//             borderOpacity: borderOpacity,
-//           }
-//         })
-//       }
       
 //       const shape = await miro.board.createShape({
 //         content: "Your Business Model Canvas",
