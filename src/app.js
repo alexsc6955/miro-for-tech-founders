@@ -89,12 +89,88 @@ function Home() {
   return [page.tag, page.options];
 }
 
+function Canvas() {
+  const title = "Miro for Tech Founders";
+  const content = [
+    {
+      tag: "p",
+      options: {
+        text: "You can now add or remove sticky notes on the canvas. Please click the button below when you are done.",
+      }
+    },
+    {
+      tag: "p",
+      options: {
+        children: [
+          {
+            tag: "strong",
+            options: {
+              text: "IMPORTANT:",
+              style: {
+                marginRight: "5px",
+              }
+            }
+          },
+          {
+            tag: "span",
+            options: {
+              text: "The sticky notes you add to the canvas should be contained within the categories of the business model canvas. For example, if you are adding a sticky note about your key partners, it should be placed inside the \"Key Partners\" shape box.",
+            }
+          }
+        ]
+      }
+    },
+  ];
+  const buttons = [
+    {
+      tag: "button",
+      options: {
+        text: "Go to Business Model Canvas",
+        classList: "button button-primary",
+        events: {
+          click: async () => {
+            if (await miro.board.ui.canOpenModal()) {
+              await miro.board.ui.openModal({
+                url: 'views/canvas-modal.html',
+                width: 600,
+                height: 400,
+                fullscreen: false,
+              });
+
+              await miro.board.ui.closePanel();
+            }
+          }
+        }
+      }
+    }
+  ];
+
+  const page = Layout({ title, content, buttons });
+  return [page.tag, page.options];
+}
+
+const mtfCollection = miro.board.storage.collection('mtf');
+
 const root = document.getElementById("root");
+
+const panelViews = {
+  home: Home,
+  canvas: Canvas,
+}
+
+function buildPannel(view = "home") {
+  const [tag, options] = panelViews[view]();
+  const element = Paradox.buildElement(tag, options);
+  return element; 
+}
+
 function render() {
   root.innerHTML = "";
-  const [tag, options] = Home();
-  const element = Paradox.buildElement(tag, options);
-  root.appendChild(element);
+  mtfCollection.get("mtf:canvas:container_id").then((containerId) => {
+    console.log(123456789, containerId);
+    const element = buildPannel(containerId ? "canvas" : "home");
+    root.appendChild(element);
+  })
 }
 
 render();
@@ -215,8 +291,6 @@ async function createCanvasCategoryItems() {
 
   return [keyPartners, keyActivities, keyResources, customerSegments, customerRelationship, channels, valueProposition, costStructure, revenueStreams];
 }
-
-const mtfCollection = miro.board.storage.collection('mtf');
 
 async function buildCanvas(containerId) {
   console.log(containerId);
