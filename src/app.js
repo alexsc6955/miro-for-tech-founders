@@ -228,26 +228,46 @@ async function buildCanvas(containerId) {
 
   // use data to build the canvas
   const items = await createCanvasCategoryItems();
-
-  // const canvasGroup =  await miro.board.group({items})
-  // const groupedItems = await canvasGroup.getItems();
-  // console.log(123,canvasGroup);
       
   // currentIterationCache for y value
-  let currentIterationCache = 0
+  let currentIterationCache = {
+    x: 0,
+    y: 0,
+  }
   async function buildStickyItem(item, content, count) {
-    if (count === 0) currentIterationCache = 0;
-    console.log(item);
+    if (count === 0) currentIterationCache = { x: 0, y: 0 };
     const sticky = await miro.board.createStickyNote({
       content,
     })
-    const y = currentIterationCache === 0
-      ? item.y - sticky.height * 1.5
-      : currentIterationCache + sticky.height * 1.5
-    sticky.x = item.x - sticky.width / 2
+    let y = 0;
+    let resetX = false;
+    if (currentIterationCache.y === 0) {
+      y = (item.y - (item.height / 2)) + sticky.height + 250
+    } else {
+      if ((currentIterationCache.x + sticky.width + 250) < (item.x + (item.width / 2) - 250)) {
+        y = currentIterationCache.y
+      } else {
+        y = currentIterationCache.y + sticky.height / 2 + 250
+        resetX = true;
+      }
+    }
+
+    let x = 0;
+    if (currentIterationCache.x === 0 || resetX) {
+      x = (item.x - (item.width / 2)) + sticky.width + 250
+    } else {
+      if ((currentIterationCache.x + sticky.width + 250) < (item.x + (item.width / 2))) {
+        x = currentIterationCache.x + sticky.width + 250
+      } else {
+        x = (item.x - (item.width / 2)) + sticky.width + 250
+      }
+    }
+    
+    sticky.x = x
     sticky.y = y
     await sticky.sync()
-    currentIterationCache = sticky.y
+    currentIterationCache.x = sticky.x
+    currentIterationCache.y = sticky.y
     return sticky
   }
   
@@ -261,7 +281,6 @@ async function buildCanvas(containerId) {
     for (let j = 0; j < dataValue.length; j++) {
       const content = dataValue[j]
       const sticky = await buildStickyItem(item, content, j);
-      stickies.push(sticky);
     }
     allGroupedItems.push({
       key: dataKey,
@@ -280,10 +299,10 @@ const checkCollection = setInterval(async () => {
   if (containerId) {
     clearInterval(checkCollection);
     buildCanvas(containerId);
-    // remove the container id from the collection
     await mtfCollection.set("mtf:canvas:container_id", null);
   }
 }, 500);
+
 // const API_URL = "http://localhost:8000/api";
   
 // const canvasSize = {
