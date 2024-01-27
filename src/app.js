@@ -45,7 +45,7 @@ function Layout(props = {}) {
   }
 }
 
-function Home() {
+function Home(props = {}) {
   const title = "Miro for Tech Founders";
   const content = [
     {
@@ -89,7 +89,9 @@ function Home() {
   return [page.tag, page.options];
 }
 
-function Canvas() {
+function Canvas(props = {}) {
+  const { elemnets = [] } = props;
+  console.log(elemnets);
   const title = "Miro for Tech Founders";
   const content = [
     {
@@ -142,7 +144,32 @@ function Canvas() {
           }
         }
       }
-    }
+    },
+    // reset
+    {
+      tag: "button",
+      options: {
+        text: "Reset",
+        classList: "button button-secondary",
+        events: {
+          click: async () => {
+            console.log("reset");
+            await mtfCollection.set("mtf:canvas:elemnets", null);
+            await mtfCollection.set("mtf:canvas:data", null);
+            await mtfCollection.set("mtf:current:page", "home");
+            const { container, categories } = elemnets;
+            await miro.board.remove(container);
+            await Promise.all(categories.map(async (category) => {
+              await miro.board.remove(category.item);
+              await Promise.all(category.stickies.map(async (sticky) => {
+                await miro.board.remove(sticky);
+              }))
+            }));
+            await miro.board.ui.closePanel();
+          }
+        }
+      }
+    },
   ];
 
   const page = Layout({ title, content, buttons });
@@ -158,17 +185,32 @@ const panelViews = {
   canvas: Canvas,
 }
 
-function buildPannel(view = "home") {
-  const [tag, options] = panelViews[view]();
+function buildPannel(view = "home", props = {}) {
+  const [tag, options] = panelViews[view](props);
   const element = Paradox.buildElement(tag, options);
   return element; 
 }
 
 function render() {
   root.innerHTML = "";
-  mtfCollection.get("mtf:canvas:container_id").then((containerId) => {
-    console.log(123456789, containerId);
-    const element = buildPannel(containerId ? "canvas" : "home");
+  mtfCollection.get("mtf:current:page").then(async (currentPage) => {
+    if (!currentPage) {
+      mtfCollection.set("mtf:current:page", "home");
+      currentPage = "home";
+    }
+    if (currentPage === "canvas") {
+      const checkCollection = setInterval(async () => {
+        const elemnets = await mtfCollection.get("mtf:canvas:elemnets");
+        if (elemnets) {
+          const parsedElemnets = JSON.parse(elemnets);
+          const element = buildPannel(currentPage, { elemnets: parsedElemnets });
+          root.appendChild(element);
+          clearInterval(checkCollection);
+        } 
+      }, 500);
+      return;
+    }
+    const element = buildPannel(currentPage);
     root.appendChild(element);
   })
 }
@@ -345,7 +387,10 @@ async function buildCanvas(containerId) {
     return sticky
   }
   
-  const allGroupedItems = [];
+  const allGroupedItems = {
+    container: shape,
+    categories: [],
+  };
   for (let i = 0; i < items.length; i++) {
     const item = items[i]
     const dataKey = Object.keys(data)[i]
@@ -355,15 +400,16 @@ async function buildCanvas(containerId) {
     for (let j = 0; j < dataValue.length; j++) {
       const content = dataValue[j]
       const sticky = await buildStickyItem(item, content, j);
+      stickies.push(sticky);
     }
-    allGroupedItems.push({
+    allGroupedItems.categories.push({
       key: dataKey,
       item,
       stickies,
     })
-
-    console.log(allGroupedItems);
   }
+
+  await mtfCollection.set("mtf:canvas:elemnets", JSON.stringify(allGroupedItems));
 
   // Re render the page with different options
 }
