@@ -63,7 +63,6 @@ Paradox.pubsub.subscribe("mtf:canvas:ready", async (data) => {
 });
 
 function Spinner(props = {}) {
-  console.log(data);
   fetch(`${VITE_API_URL}/build-business-model`, {
     method: "POST",
     headers: {
@@ -71,7 +70,6 @@ function Spinner(props = {}) {
     },
     body: JSON.stringify(data)
   }).then(res => res.json()).then(json => {
-    console.log(json);
     Paradox.pubsub.publish("mtf:canvas:ready", json);
   })
 

@@ -91,7 +91,6 @@ function Home(props = {}) {
 
 function Canvas(props = {}) {
   const { elemnets = [] } = props;
-  console.log(elemnets);
   const title = "Miro for Tech Founders";
   const content = [
     {
@@ -153,7 +152,6 @@ function Canvas(props = {}) {
         classList: "button button-secondary",
         events: {
           click: async () => {
-            console.log("reset");
             await mtfCollection.set("mtf:canvas:elemnets", null);
             await mtfCollection.set("mtf:canvas:data", null);
             await mtfCollection.set("mtf:current:page", "home");
@@ -191,7 +189,7 @@ function buildPannel(view = "home", props = {}) {
   return element; 
 }
 
-function render() {
+async function render() {
   root.innerHTML = "";
   mtfCollection.get("mtf:current:page").then(async (currentPage) => {
     if (!currentPage) {
@@ -335,7 +333,6 @@ async function createCanvasCategoryItems() {
 }
 
 async function buildCanvas(containerId) {
-  console.log(containerId);
   const shapeItem = await miro.board.get({ id: containerId });
   const shape = shapeItem[0];
 
@@ -395,7 +392,6 @@ async function buildCanvas(containerId) {
     const item = items[i]
     const dataKey = Object.keys(data)[i]
     const dataValue = data[dataKey]
-    // console.log(i, item, dataKey, dataValue);
     const stickies = [];
     for (let j = 0; j < dataValue.length; j++) {
       const content = dataValue[j]
